@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "br.com.zup.edu";
+option java_outer_classname = "DesafioPix";
+option objc_class_prefix = "HLW";
+
+package br.com.zup.edu;
+
+service ChavePixService {
+  rpc gerarChave (ChaveRequest) returns (ChaveResponse) {}
+}
+
+enum TipoConta {
+  UNKNOW = 0;
+  CONTA_CORRENTE = 1;
+  CONTA_POUPANCA = 2;
+}
+
+enum TipoChave {
+  INVALID = 0;
+  CPF = 1;
+  TELEFONE = 2;
+  EMAIL = 3;
+  RANDOM = 4;
+}
+
+message ChaveRequest {
+  string cliente = 1;
+  TipoChave tipoChave = 2;
+  string chave = 3;
+  TipoConta conta = 4;
+}
+
+message ChaveResponse {
+  int64 pixId = 1;
+}

@@ -1,0 +1,25 @@
+micronaut:
+  application:
+    name: desafioPix
+
+datasources:
+  default:
+    url: jdbc:mysql://localhost:3306/dpix
+    driverClassName: com.mysql.cj.jdbc.Driver
+    username: root
+    password: '12345678'
+    dialect: MYSQL
+
+jpa:
+  default:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        hbm2ddl:
+          auto: update
+
+erp:
+  itau:
+    host: 'http://localhost:9091'
+    get-client: '/api/v1/clientes/'
