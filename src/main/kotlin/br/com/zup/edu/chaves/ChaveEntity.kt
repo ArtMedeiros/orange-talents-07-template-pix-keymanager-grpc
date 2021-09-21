@@ -5,6 +5,7 @@ import javax.persistence.EnumType.*
 import javax.persistence.GenerationType.*
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
+import javax.validation.constraints.Size
 
 @Entity
 class ChaveEntity(
@@ -12,7 +13,7 @@ class ChaveEntity(
     val idCliente: String,
     @NotNull @Enumerated(value = STRING)
     val tipo: TipoChaveEntity,
-    @NotBlank
+    @NotBlank @Size(max = 77)
     var valor: String,
     @NotNull @Enumerated(value = STRING)
     val tipoConta: TipoContaEntity

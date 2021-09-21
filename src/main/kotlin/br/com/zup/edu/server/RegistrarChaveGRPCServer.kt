@@ -5,12 +5,9 @@ import br.com.zup.edu.ChaveRequest
 import br.com.zup.edu.ChaveResponse
 import br.com.zup.edu.chaves.ChaveGRPCRequest
 import br.com.zup.edu.chaves.ChavePixRepository
-import br.com.zup.edu.externo.itau.ContaItauResponse
 import br.com.zup.edu.externo.itau.ErpItauClient
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
-import io.micronaut.http.HttpResponse
-import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.validation.validator.Validator
 import jakarta.inject.Singleton
@@ -42,9 +39,11 @@ class RegistrarChaveGRPCServer(
             }
 
             if (repository.existsByValor(chaveRequest.chave)) {
-                responseObserver.onError(Status.ALREADY_EXISTS
-                    .withDescription("Chave já cadastrada")
-                    .asRuntimeException())
+                responseObserver.onError(
+                    Status.ALREADY_EXISTS
+                        .withDescription("Chave já cadastrada")
+                        .asRuntimeException()
+                )
 
                 logger.error("Chave já cadastrada")
                 return
@@ -54,9 +53,11 @@ class RegistrarChaveGRPCServer(
 
             val cliente = clienteERP.buscarCliente(chave.idCliente, chave.tipoConta)
             if (cliente == null) {
-                responseObserver.onError(Status.NOT_FOUND
-                    .withDescription("Cliente não encontrado")
-                    .asRuntimeException())
+                responseObserver.onError(
+                    Status.NOT_FOUND
+                        .withDescription("Cliente não encontrado")
+                        .asRuntimeException()
+                )
 
                 logger.error("Cliente não encontrado")
                 return
@@ -73,21 +74,27 @@ class RegistrarChaveGRPCServer(
             logger.info("Chave pix cadastrada com sucesso!")
 
         } catch (e: ConstraintViolationException) {
-            responseObserver.onError(Status.INVALID_ARGUMENT
-                .withDescription(e.message)
-                .asRuntimeException())
+            responseObserver.onError(
+                Status.INVALID_ARGUMENT
+                    .withDescription(e.message)
+                    .asRuntimeException()
+            )
 
             logger.error(e.message)
         } catch (e: HttpClientResponseException) {
-            responseObserver.onError(Status.UNAVAILABLE
-                .withDescription("Serviço indisponível")
-                .asRuntimeException())
+            responseObserver.onError(
+                Status.UNAVAILABLE
+                    .withDescription("Serviço indisponível")
+                    .asRuntimeException()
+            )
 
             logger.error("Serviço indisponível")
         } catch (e: Exception) {
-            responseObserver.onError(Status.INTERNAL
-                .withDescription("Falha ao processar requisição")
-                .asRuntimeException())
+            responseObserver.onError(
+                Status.INTERNAL
+                    .withDescription("Falha ao processar requisição")
+                    .asRuntimeException()
+            )
 
             logger.error(e.cause.toString())
         }

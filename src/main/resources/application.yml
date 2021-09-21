@@ -22,4 +22,4 @@ jpa:
 erp:
   itau:
     host: 'http://localhost:9091'
-    get-client: '/api/v1/clientes/'
+    get-client: '/api/v1/clientes/{clienteId}/contas'
