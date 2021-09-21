@@ -1,9 +1,12 @@
 package br.com.zup.edu.utils.services
 
+import br.com.zup.edu.RemoverRequest
 import br.com.zup.edu.chaves.ChaveEntity
 import br.com.zup.edu.chaves.ChaveGRPCRequest
 import br.com.zup.edu.chaves.ChavePixRepository
+import br.com.zup.edu.chaves.RemoverChaveRequest
 import br.com.zup.edu.utils.error.ChaveDuplicadaException
+import br.com.zup.edu.utils.error.ChaveNaoEncontradaException
 import br.com.zup.edu.utils.services.itau.ErpItauClient
 import io.micronaut.http.client.exceptions.HttpClientException
 import jakarta.inject.Singleton
@@ -32,6 +35,15 @@ open class ChavePixService(
         repository.save(chave)
 
         return chave
+    }
+
+    @Transactional
+    open fun remove(@Valid removerChave: RemoverChaveRequest) {
+        val chave = repository.findByIdAndIdCliente(removerChave.id, removerChave.cliente)
+        if (chave.isEmpty)
+            throw ChaveNaoEncontradaException("Chave não encontrada")
+
+        repository.delete(chave.get())
     }
 
 }

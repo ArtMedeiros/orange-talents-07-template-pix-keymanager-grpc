@@ -1,10 +1,12 @@
 package br.com.zup.edu.utils.services
 
 import br.com.zup.edu.ChaveRequest
+import br.com.zup.edu.RemoverRequest
 import br.com.zup.edu.TipoChave.INVALID
 import br.com.zup.edu.TipoConta
 import br.com.zup.edu.TipoConta.*
 import br.com.zup.edu.chaves.ChaveGRPCRequest
+import br.com.zup.edu.chaves.RemoverChaveRequest
 import br.com.zup.edu.chaves.TipoChaveEntity
 import br.com.zup.edu.chaves.TipoContaEntity
 
@@ -20,5 +22,12 @@ fun ChaveRequest.toModel(): ChaveGRPCRequest {
             UNKNOW -> null
             else -> TipoContaEntity.valueOf(conta.name)
         }
+    )
+}
+
+fun RemoverRequest.toModel(): RemoverChaveRequest {
+    return RemoverChaveRequest(
+        id = pixId,
+        cliente = cliente
     )
 }

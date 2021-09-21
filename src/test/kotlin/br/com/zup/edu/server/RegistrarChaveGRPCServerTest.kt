@@ -247,13 +247,4 @@ internal class RegistrarChaveGRPCServerTest(
     fun erpMock(): ErpItauClient {
         return Mockito.mock(ErpItauClient::class.java)
     }
-
-    @Factory
-    class ClientsTest {
-
-        @Singleton
-        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): ChavePixServiceGrpc.ChavePixServiceBlockingStub? {
-            return ChavePixServiceGrpc.newBlockingStub(channel)
-        }
-    }
 }

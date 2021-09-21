@@ -9,6 +9,7 @@ package br.com.zup.edu;
 
 service ChavePixService {
   rpc gerarChave (ChaveRequest) returns (ChaveResponse) {}
+  rpc removerChave (RemoverRequest) returns (RemoverResponse) {}
 }
 
 enum TipoConta {
@@ -34,4 +35,13 @@ message ChaveRequest {
 
 message ChaveResponse {
   int64 pixId = 1;
+}
+
+message RemoverRequest {
+  int64 pixId = 1;
+  string cliente = 2;
+}
+
+message RemoverResponse {
+  string status = 1;
 }

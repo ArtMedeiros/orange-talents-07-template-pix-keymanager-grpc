@@ -1,11 +1,11 @@
 package br.com.zup.edu.server
 
-import br.com.zup.edu.ChavePixServiceGrpc
-import br.com.zup.edu.ChaveRequest
-import br.com.zup.edu.ChaveResponse
+import br.com.zup.edu.*
 import br.com.zup.edu.utils.error.ChaveDuplicadaException
+import br.com.zup.edu.utils.error.ChaveNaoEncontradaException
 import br.com.zup.edu.utils.services.ChavePixService
 import br.com.zup.edu.utils.services.toModel
+import io.grpc.Status
 import io.grpc.Status.*
 import io.grpc.stub.StreamObserver
 import io.micronaut.http.client.exceptions.HttpClientException
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 import javax.validation.ConstraintViolationException
 
 @Singleton
-class RegistrarChaveGRPCServer(
+class PixGRPCServer(
     val service: ChavePixService
 ) : ChavePixServiceGrpc.ChavePixServiceImplBase() {
 
@@ -57,6 +57,38 @@ class RegistrarChaveGRPCServer(
             )
 
             logger.error("Serviço indisponível")
+        }
+    }
+
+    override fun removerChave(request: RemoverRequest, responseObserver: StreamObserver<RemoverResponse>) {
+        try {
+            val remover = request.toModel()
+            service.remove(remover)
+
+            val response = RemoverResponse.newBuilder()
+                .setStatus("OK")
+                .build()
+
+            responseObserver.onNext(response)
+            responseObserver.onCompleted()
+
+            logger.info("Chave removida")
+        } catch (e: ConstraintViolationException) {
+            responseObserver.onError(
+                Status.INVALID_ARGUMENT
+                    .withDescription(e.message)
+                    .asRuntimeException()
+            )
+
+            logger.error(e.message)
+        } catch (e: ChaveNaoEncontradaException) {
+            responseObserver.onError(
+                Status.NOT_FOUND
+                    .withDescription(e.message)
+                    .asRuntimeException()
+            )
+
+            logger.error("Chave não encontrada")
         }
     }
 }
