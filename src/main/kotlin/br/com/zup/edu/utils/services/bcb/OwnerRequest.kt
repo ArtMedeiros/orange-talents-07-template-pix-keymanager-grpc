@@ -1,4 +1,4 @@
-package br.com.zup.edu.externo.bcb
+package br.com.zup.edu.utils.services.bcb
 
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull

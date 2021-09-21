@@ -1,7 +1,6 @@
-package br.com.zup.edu.externo.itau
+package br.com.zup.edu.utils.services.itau
 
 import br.com.zup.edu.chaves.TipoContaEntity
-import br.com.zup.edu.externo.bcb.CreatePixKeyRequest
 import io.micronaut.core.annotation.Introspected
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull

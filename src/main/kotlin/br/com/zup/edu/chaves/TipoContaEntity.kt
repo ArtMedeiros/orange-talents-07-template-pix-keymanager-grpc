@@ -1,6 +1,6 @@
 package br.com.zup.edu.chaves
 
-import br.com.zup.edu.externo.bcb.TipoContaBCB
+import br.com.zup.edu.utils.services.bcb.TipoContaBCB
 
 enum class TipoContaEntity {
     CONTA_CORRENTE {

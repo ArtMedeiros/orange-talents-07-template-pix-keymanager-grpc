@@ -55,6 +55,9 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
     testImplementation("com.h2database:h2")
 
+    // https://mvnrepository.com/artifact/org.hibernate/hibernate-validator
+    implementation("org.hibernate:hibernate-validator:7.0.1.Final")
+
 }
 
 

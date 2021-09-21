@@ -8,10 +8,10 @@ import br.com.zup.edu.chaves.ChaveEntity
 import br.com.zup.edu.chaves.ChavePixRepository
 import br.com.zup.edu.chaves.TipoChaveEntity
 import br.com.zup.edu.chaves.TipoContaEntity
-import br.com.zup.edu.externo.itau.ContaItauResponse
-import br.com.zup.edu.externo.itau.ErpItauClient
-import br.com.zup.edu.externo.itau.InstituicaoResponse
-import br.com.zup.edu.externo.itau.TitularConta
+import br.com.zup.edu.utils.services.itau.ContaItauResponse
+import br.com.zup.edu.utils.services.itau.ErpItauClient
+import br.com.zup.edu.utils.services.itau.InstituicaoResponse
+import br.com.zup.edu.utils.services.itau.TitularConta
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -159,7 +159,7 @@ internal class RegistrarChaveGRPCServerTest(
 
         with(error) {
             assertEquals(Status.INVALID_ARGUMENT.code, status.code)
-            assertEquals(": CPF inválido", status.description)
+            assertTrue(this.status.description!!.endsWith("Chave inválida"))
         }
     }
 
@@ -212,8 +212,8 @@ internal class RegistrarChaveGRPCServerTest(
         }
 
         with(error) {
-            assertEquals(Status.INTERNAL.code, status.code)
-            assertEquals("Falha ao processar requisição", status.description)
+            assertEquals(Status.NOT_FOUND.code, status.code)
+            assertEquals("Cliente não encontrado", status.description)
         }
     }
 
@@ -238,8 +238,8 @@ internal class RegistrarChaveGRPCServerTest(
         }
 
         with(error) {
-            assertEquals(Status.UNAVAILABLE.code, status.code)
-            assertEquals("Serviço indisponível", status.description)
+            assertEquals(Status.NOT_FOUND.code, status.code)
+            assertEquals("Cliente não encontrado", status.description)
         }
     }
 

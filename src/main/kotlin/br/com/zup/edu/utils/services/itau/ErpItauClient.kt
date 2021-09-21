@@ -1,7 +1,6 @@
-package br.com.zup.edu.externo.itau
+package br.com.zup.edu.utils.services.itau
 
 import br.com.zup.edu.chaves.TipoContaEntity
-import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.PathVariable
 import io.micronaut.http.annotation.QueryValue
