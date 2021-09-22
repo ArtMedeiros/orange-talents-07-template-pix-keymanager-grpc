@@ -9,14 +9,20 @@ import javax.validation.constraints.Size
 
 @Entity
 class ChaveEntity(
-    @NotBlank
+    @field:NotBlank
     val idCliente: String,
-    @NotNull @Enumerated(value = STRING)
+
+    @field:NotNull @Enumerated(value = STRING)
     val tipo: TipoChaveEntity,
-    @NotBlank @Size(max = 77)
+
+    @field:NotBlank @Size(max = 77)
     var valor: String,
-    @NotNull @Enumerated(value = STRING)
-    val tipoConta: TipoContaEntity
+
+    @field:NotNull @Enumerated(value = STRING)
+    val tipoConta: TipoContaEntity,
+
+    @field:NotNull
+    val banco: String
 ) {
     @Id
     @GeneratedValue(strategy = IDENTITY)

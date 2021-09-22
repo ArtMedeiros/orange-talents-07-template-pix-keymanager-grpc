@@ -14,14 +14,39 @@ data class ChaveGRPCRequest(
     val cliente: String,
     @field:NotNull
     val tipo: TipoChaveEntity?,
-    var chave: String,
+    val chave: String,
     @field:NotNull
     val tipoConta: TipoContaEntity?
 ) {
-    fun toChaveEntity(): ChaveEntity {
-        if(tipo == TipoChaveEntity.RANDOM)
-            chave = UUID.randomUUID().toString()
 
-        return ChaveEntity(cliente, tipo!!, chave, tipoConta!!)
+    var valor: String
+        private set
+
+    var banco: String = ""
+        private set
+
+    init{
+        valor = when(tipo) {
+            TipoChaveEntity.RANDOM -> UUID.randomUUID().toString()
+            else -> chave
+        }
+    }
+
+    fun toChaveEntity(): ChaveEntity {
+        return ChaveEntity(
+            idCliente = cliente,
+            tipo = tipo!!,
+            valor = valor,
+            tipoConta = tipoConta!!,
+            banco = banco
+        )
+    }
+
+    fun chaveRandom(random: String) {
+        valor = random
+    }
+
+    fun atualizarBanco(ispb: String) {
+        banco = ispb
     }
 }

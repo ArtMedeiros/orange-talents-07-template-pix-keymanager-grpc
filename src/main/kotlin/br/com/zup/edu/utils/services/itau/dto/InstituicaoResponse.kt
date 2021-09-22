@@ -1,4 +1,4 @@
-package br.com.zup.edu.utils.services.itau
+package br.com.zup.edu.utils.services.itau.dto
 
 import io.micronaut.core.annotation.Introspected
 import javax.validation.constraints.NotBlank

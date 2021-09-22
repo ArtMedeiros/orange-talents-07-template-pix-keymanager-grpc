@@ -1,4 +1,4 @@
-package br.com.zup.edu.utils.services.itau
+package br.com.zup.edu.utils.services.itau.dto
 
 import br.com.zup.edu.chaves.TipoContaEntity
 import io.micronaut.core.annotation.Introspected

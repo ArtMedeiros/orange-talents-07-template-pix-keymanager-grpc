@@ -2,14 +2,13 @@ syntax = "proto3";
 
 option java_multiple_files = true;
 option java_package = "br.com.zup.edu";
-option java_outer_classname = "DesafioPix";
+option java_outer_classname = "RegistrarChavePix";
 option objc_class_prefix = "HLW";
 
 package br.com.zup.edu;
 
-service ChavePixService {
+service RegistrarChaveService {
   rpc gerarChave (ChaveRequest) returns (ChaveResponse) {}
-  rpc removerChave (RemoverRequest) returns (RemoverResponse) {}
 }
 
 enum TipoConta {
@@ -35,13 +34,4 @@ message ChaveRequest {
 
 message ChaveResponse {
   int64 pixId = 1;
-}
-
-message RemoverRequest {
-  int64 pixId = 1;
-  string cliente = 2;
-}
-
-message RemoverResponse {
-  string status = 1;
 }

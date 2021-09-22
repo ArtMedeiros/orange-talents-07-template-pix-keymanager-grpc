@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "br.com.zup.edu";
+option java_outer_classname = "RemoverChavePix";
+option objc_class_prefix = "HLW";
+
+package br.com.zup.edu;
+
+service RemoverChaveService {
+  rpc removerChave (RemoverRequest) returns (RemoverResponse) {}
+}
+
+message RemoverRequest {
+  int64 pixId = 1;
+  string cliente = 2;
+}
+
+message RemoverResponse {
+  string status = 1;
+}
