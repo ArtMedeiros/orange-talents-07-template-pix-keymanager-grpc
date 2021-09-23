@@ -34,10 +34,10 @@ enum class TipoChaveEntity {
         }
 
         override fun valida(valor: String): Boolean {
-            return EmailValidator().run {
-                initialize(null)
-                isValid(valor, null)
-            }
+            return if (valor.isNullOrBlank())
+                false
+            else
+                valor.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+\$".toRegex())
         }
     },
     RANDOM {

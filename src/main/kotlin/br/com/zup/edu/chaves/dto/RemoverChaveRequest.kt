@@ -1,4 +1,4 @@
-package br.com.zup.edu.chaves
+package br.com.zup.edu.chaves.dto
 
 import io.micronaut.core.annotation.Introspected
 import javax.validation.constraints.NotBlank

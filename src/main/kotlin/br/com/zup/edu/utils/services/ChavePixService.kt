@@ -1,8 +1,9 @@
 package br.com.zup.edu.utils.services
 
-import br.com.zup.edu.RemoverRequest
-import br.com.zup.edu.TipoChave
 import br.com.zup.edu.chaves.*
+import br.com.zup.edu.chaves.dto.RegistrarChaveRequest
+import br.com.zup.edu.chaves.dto.ConsultarChaveRequest
+import br.com.zup.edu.chaves.dto.RemoverChaveRequest
 import br.com.zup.edu.utils.error.ChaveDuplicadaException
 import br.com.zup.edu.utils.error.ChaveNaoEncontradaException
 import br.com.zup.edu.utils.error.ClienteNaoEncontradoException
@@ -11,14 +12,8 @@ import br.com.zup.edu.utils.services.bcb.TipoUsuarioBCB
 import br.com.zup.edu.utils.services.bcb.dto.*
 import br.com.zup.edu.utils.services.itau.ErpItauClient
 import io.micronaut.http.HttpStatus
-import io.micronaut.http.client.exceptions.HttpClientException
-import io.micronaut.http.client.exceptions.HttpClientResponseException
 import jakarta.inject.Singleton
 import org.slf4j.LoggerFactory
-import java.util.*
-import javax.transaction.Status
-import javax.transaction.Transactional
-import javax.validation.ConstraintViolationException
 import javax.validation.Valid
 
 @Singleton
@@ -30,7 +25,7 @@ open class ChavePixService(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    open fun registra(@Valid novaChave: ChaveGRPCRequest): ChaveEntity {
+    open fun registra(@Valid novaChave: RegistrarChaveRequest): ChaveEntity {
         if (repository.existsByValor(novaChave.chave)) {
             throw ChaveDuplicadaException("Chave já cadastrada")
         }

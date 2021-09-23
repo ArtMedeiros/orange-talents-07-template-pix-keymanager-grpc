@@ -1,10 +1,6 @@
 package br.com.zup.edu.utils
 
-import br.com.zup.edu.TipoChave
-import br.com.zup.edu.TipoConta
-import br.com.zup.edu.chaves.ChaveGRPCRequest
-import br.com.zup.edu.chaves.TipoChaveEntity
-import br.com.zup.edu.chaves.TipoContaEntity
+import br.com.zup.edu.chaves.dto.RegistrarChaveRequest
 import io.micronaut.core.annotation.AnnotationValue
 import io.micronaut.validation.validator.constraints.ConstraintValidator
 import io.micronaut.validation.validator.constraints.ConstraintValidatorContext
@@ -18,9 +14,9 @@ annotation class ChaveValida(
 )
 
 @Singleton
-class ChaveValidator : ConstraintValidator<ChaveValida, ChaveGRPCRequest> {
+class ChaveValidator : ConstraintValidator<ChaveValida, RegistrarChaveRequest> {
     override fun isValid(
-        value: ChaveGRPCRequest,
+        value: RegistrarChaveRequest,
         annotationMetadata: AnnotationValue<ChaveValida>,
         context: ConstraintValidatorContext
     ): Boolean {

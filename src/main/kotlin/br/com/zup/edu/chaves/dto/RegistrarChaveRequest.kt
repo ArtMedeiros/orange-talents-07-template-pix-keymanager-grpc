@@ -1,7 +1,9 @@
-package br.com.zup.edu.chaves
+package br.com.zup.edu.chaves.dto
 
-import br.com.zup.edu.TipoChave
-import br.com.zup.edu.TipoConta
+import br.com.zup.edu.chaves.ChaveEntity
+import br.com.zup.edu.chaves.Conta
+import br.com.zup.edu.chaves.TipoChaveEntity
+import br.com.zup.edu.chaves.TipoContaEntity
 import br.com.zup.edu.utils.ChaveValida
 import br.com.zup.edu.utils.services.itau.dto.ContaItauResponse
 import io.micronaut.core.annotation.Introspected
@@ -11,7 +13,7 @@ import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
 @Introspected @ChaveValida
-data class ChaveGRPCRequest(
+data class RegistrarChaveRequest(
     @field:NotBlank
     val cliente: String,
     @field:NotNull

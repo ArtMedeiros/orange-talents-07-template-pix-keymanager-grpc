@@ -8,13 +8,16 @@ import br.com.zup.edu.RemoverRequest
 import br.com.zup.edu.TipoChave.INVALID
 import br.com.zup.edu.TipoConta.UNKNOW
 import br.com.zup.edu.chaves.*
+import br.com.zup.edu.chaves.dto.RegistrarChaveRequest
+import br.com.zup.edu.chaves.dto.ConsultarChaveRequest
+import br.com.zup.edu.chaves.dto.RemoverChaveRequest
 import com.google.protobuf.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import javax.validation.ConstraintViolationException
 
-fun ChaveRequest.toModel(): ChaveGRPCRequest {
-    return ChaveGRPCRequest(
+fun ChaveRequest.toModel(): RegistrarChaveRequest {
+    return RegistrarChaveRequest(
         cliente = cliente,
         tipo = when (tipoChave) {
             INVALID -> null
@@ -35,7 +38,7 @@ fun RemoverRequest.toModel(): RemoverChaveRequest {
     )
 }
 
-fun ConsultaRequest.toModel(): ConsultarChaveRequest{
+fun ConsultaRequest.toModel(): ConsultarChaveRequest {
     return when(filtroCase) {
         FILTRO_NOT_SET -> throw ConstraintViolationException("Request inválida", setOf())
         else -> ConsultarChaveRequest(
