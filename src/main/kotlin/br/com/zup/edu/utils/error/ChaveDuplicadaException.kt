@@ -1,3 +1,3 @@
 package br.com.zup.edu.utils.error
 
-class ChaveDuplicadaException(message: String): Exception(message)
+class ChaveDuplicadaException(message: String) : Exception(message)

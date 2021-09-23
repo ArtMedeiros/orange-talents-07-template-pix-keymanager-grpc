@@ -4,17 +4,16 @@ import br.com.zup.edu.ChaveRequest
 import br.com.zup.edu.RegistrarChaveServiceGrpc
 import br.com.zup.edu.TipoChave
 import br.com.zup.edu.TipoConta
-import br.com.zup.edu.chaves.ChaveEntity
-import br.com.zup.edu.chaves.ChavePixRepository
-import br.com.zup.edu.chaves.TipoChaveEntity
-import br.com.zup.edu.chaves.TipoContaEntity
+import br.com.zup.edu.chaves.*
 import br.com.zup.edu.utils.services.bcb.BcbClient
 import br.com.zup.edu.utils.services.bcb.TipoChaveBCB
-import br.com.zup.edu.utils.services.bcb.TipoContaBCB
 import br.com.zup.edu.utils.services.bcb.TipoUsuarioBCB
-import br.com.zup.edu.utils.services.bcb.dto.*
-import br.com.zup.edu.utils.services.itau.dto.ContaItauResponse
+import br.com.zup.edu.utils.services.bcb.dto.BankAccountRequest
+import br.com.zup.edu.utils.services.bcb.dto.CreatePixKeyRequest
+import br.com.zup.edu.utils.services.bcb.dto.CreatePixKeyResponse
+import br.com.zup.edu.utils.services.bcb.dto.OwnerRequest
 import br.com.zup.edu.utils.services.itau.ErpItauClient
+import br.com.zup.edu.utils.services.itau.dto.ContaItauResponse
 import br.com.zup.edu.utils.services.itau.dto.InstituicaoResponse
 import br.com.zup.edu.utils.services.itau.dto.TitularConta
 import io.grpc.ManagedChannel
@@ -35,7 +34,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import java.time.LocalDateTime
-import java.util.*
 
 @MicronautTest(
     rollback = false,
@@ -51,8 +49,6 @@ internal class RegistrarChaveServerTest(
     lateinit var contaItauResponse: ContaItauResponse
     lateinit var bcbRequest: CreatePixKeyRequest
     lateinit var bcbResponse: CreatePixKeyResponse
-    lateinit var bcbRequestRandom: CreatePixKeyRequest
-    lateinit var bcbResponseRandom: CreatePixKeyResponse
 
     @BeforeEach
     internal fun setUp() {
@@ -197,8 +193,7 @@ internal class RegistrarChaveServerTest(
             idCliente = "c56dfef4-7901-44fb-84e2-a2cefb157890",
             tipo = TipoChaveEntity.CPF,
             valor = "00000000000",
-            TipoContaEntity.CONTA_CORRENTE,
-            banco = "60701190"
+            conta = contaItauResponse.toModel()
         )
 
         repository.save(chave)
@@ -234,8 +229,8 @@ internal class RegistrarChaveServerTest(
         }
 
         with(error) {
-            assertEquals(Status.NOT_FOUND.code, status.code)
-            assertEquals("Cliente não encontrado", status.description)
+            assertEquals(Status.UNAVAILABLE.code, status.code)
+            assertEquals("Serviço temporariamente indisponível", status.description)
         }
     }
 
@@ -261,7 +256,7 @@ internal class RegistrarChaveServerTest(
 
         with(error) {
             assertEquals(Status.NOT_FOUND.code, status.code)
-            assertEquals("Cliente não encontrado", status.description)
+            assertEquals("Chave ou Cliente não encontrado", status.description)
         }
     }
 
@@ -290,8 +285,8 @@ internal class RegistrarChaveServerTest(
         }
 
         with(error) {
-            assertEquals(Status.NOT_FOUND.code, status.code)
-            assertEquals("Cliente não encontrado", status.description)
+            assertEquals(Status.UNAVAILABLE.code, status.code)
+            assertEquals("Serviço temporariamente indisponível", status.description)
         }
     }
 

@@ -5,20 +5,20 @@ import br.com.zup.edu.TipoChave
 import br.com.zup.edu.chaves.*
 import br.com.zup.edu.utils.error.ChaveDuplicadaException
 import br.com.zup.edu.utils.error.ChaveNaoEncontradaException
+import br.com.zup.edu.utils.error.ClienteNaoEncontradoException
 import br.com.zup.edu.utils.services.bcb.BcbClient
 import br.com.zup.edu.utils.services.bcb.TipoUsuarioBCB
-import br.com.zup.edu.utils.services.bcb.dto.BankAccountRequest
-import br.com.zup.edu.utils.services.bcb.dto.CreatePixKeyRequest
-import br.com.zup.edu.utils.services.bcb.dto.DeletePixKeyRequest
-import br.com.zup.edu.utils.services.bcb.dto.OwnerRequest
+import br.com.zup.edu.utils.services.bcb.dto.*
 import br.com.zup.edu.utils.services.itau.ErpItauClient
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.exceptions.HttpClientException
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import jakarta.inject.Singleton
 import org.slf4j.LoggerFactory
+import java.util.*
 import javax.transaction.Status
 import javax.transaction.Transactional
+import javax.validation.ConstraintViolationException
 import javax.validation.Valid
 
 @Singleton
@@ -30,16 +30,15 @@ open class ChavePixService(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @Transactional
     open fun registra(@Valid novaChave: ChaveGRPCRequest): ChaveEntity {
         if (repository.existsByValor(novaChave.chave)) {
             throw ChaveDuplicadaException("Chave já cadastrada")
         }
 
         val cliente = erpCliet.buscarCliente(novaChave.cliente, novaChave.tipoConta!!)
-            ?: throw HttpClientException("Cliente não encontrado")
+            ?: throw ClienteNaoEncontradoException("Cliente não encontrado")
 
-        novaChave.atualizarBanco(cliente.instituicao.ispb)
+        novaChave.dadosConta(cliente)
 
         val bcbRequest = CreatePixKeyRequest(
             keyType = novaChave.tipo!!.converterBcb(),
@@ -59,8 +58,9 @@ open class ChavePixService(
 
         logger.info("Registrando chave")
         val bcbResponse = bcbClient.cadastrarChave(bcbRequest) ?: throw ChaveDuplicadaException("Chave já cadastrada")
+        novaChave.dataCriacao(bcbResponse.createdAt)
 
-        if(novaChave.tipo == TipoChaveEntity.RANDOM){
+        if (novaChave.tipo == TipoChaveEntity.RANDOM) {
             novaChave.chaveRandom(bcbResponse.key)
         }
 
@@ -70,8 +70,7 @@ open class ChavePixService(
         return chave
     }
 
-    @Transactional
-    open fun remove(@Valid removerChave: RemoverChaveRequest) : ChaveEntity {
+    open fun remove(@Valid removerChave: RemoverChaveRequest): ChaveEntity {
 
         logger.info("Verificando chave")
         val chaveBanco = repository.findByIdAndIdCliente(removerChave.id, removerChave.cliente)
@@ -82,7 +81,7 @@ open class ChavePixService(
 
         val bcbRequest = DeletePixKeyRequest(
             key = chave.valor,
-            participant = chave.banco
+            participant = chave.instituicao().ispb
         )
 
         logger.info("Desvinculando chave")
@@ -95,4 +94,17 @@ open class ChavePixService(
         return chave
     }
 
+    open fun consulta(consultaChave: ConsultarChaveRequest): ChaveEntity {
+        return if (consultaChave.chave.isBlank()) {
+            val chaveBanco = repository.findByIdAndIdCliente(consultaChave.pixId!!, consultaChave.clienteId!!)
+            if (chaveBanco.isEmpty)
+                throw ChaveNaoEncontradaException("Chave não encontrada")
+
+            chaveBanco.get()
+        } else {
+            bcbClient.buscarChaveByValor(consultaChave.chave)
+                ?: throw ChaveNaoEncontradaException("Chave não encontrada")
+            repository.findByValor(consultaChave.chave)
+        }
+    }
 }

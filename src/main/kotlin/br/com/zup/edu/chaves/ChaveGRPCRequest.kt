@@ -3,7 +3,9 @@ package br.com.zup.edu.chaves
 import br.com.zup.edu.TipoChave
 import br.com.zup.edu.TipoConta
 import br.com.zup.edu.utils.ChaveValida
+import br.com.zup.edu.utils.services.itau.dto.ContaItauResponse
 import io.micronaut.core.annotation.Introspected
+import java.time.LocalDateTime
 import java.util.*
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
@@ -22,8 +24,9 @@ data class ChaveGRPCRequest(
     var valor: String
         private set
 
-    var banco: String = ""
-        private set
+    private lateinit var conta: Conta
+
+    private lateinit var criadaEm: LocalDateTime
 
     init{
         valor = when(tipo) {
@@ -37,8 +40,8 @@ data class ChaveGRPCRequest(
             idCliente = cliente,
             tipo = tipo!!,
             valor = valor,
-            tipoConta = tipoConta!!,
-            banco = banco
+            conta = conta,
+            criadaEm = criadaEm
         )
     }
 
@@ -46,7 +49,11 @@ data class ChaveGRPCRequest(
         valor = random
     }
 
-    fun atualizarBanco(ispb: String) {
-        banco = ispb
+    fun dadosConta(contaResponse: ContaItauResponse) {
+        conta = contaResponse.toModel()
+    }
+
+    fun dataCriacao(data: LocalDateTime) {
+        criadaEm = data
     }
 }

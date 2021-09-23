@@ -8,6 +8,9 @@ import br.com.zup.edu.chaves.TipoChaveEntity
 import br.com.zup.edu.chaves.TipoContaEntity
 import br.com.zup.edu.utils.services.bcb.BcbClient
 import br.com.zup.edu.utils.services.bcb.dto.DeletePixKeyRequest
+import br.com.zup.edu.utils.services.itau.dto.ContaItauResponse
+import br.com.zup.edu.utils.services.itau.dto.InstituicaoResponse
+import br.com.zup.edu.utils.services.itau.dto.TitularConta
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -32,18 +35,35 @@ internal class RemoverChaveServerTest(
     private val grpcClient: RemoverChaveServiceGrpc.RemoverChaveServiceBlockingStub
 ) {
 
+    val instituicaoResponse = InstituicaoResponse(
+        nome = "ITAÚ UNIBANCO S.A.",
+        ispb = "60701190"
+    )
+
+    val titularConta = TitularConta(
+        id = "c56dfef4-7901-44fb-84e2-a2cefb157890",
+        nome = "Rafael M C Ponte",
+        cpf = "02467781054"
+    )
+
+    val contaItauResponse = ContaItauResponse(
+        tipo = TipoContaEntity.CONTA_CORRENTE,
+        instituicao = instituicaoResponse,
+        agencia = "0001",
+        numero = "291900",
+        titular = titularConta
+    )
 
     val chave: ChaveEntity = ChaveEntity(
         idCliente = "de95a228-1f27-4ad2-907e-e5a2d816e9bc",
         tipo = TipoChaveEntity.CPF,
         valor = "31643468081",
-        tipoConta = TipoContaEntity.CONTA_CORRENTE,
-        banco = "60701190"
+        conta = contaItauResponse.toModel()
     )
 
     val deleteKey = DeletePixKeyRequest(
         key = chave.valor,
-        participant = chave.banco
+        participant = chave.instituicao().ispb
     )
 
     @BeforeEach
@@ -128,7 +148,7 @@ internal class RemoverChaveServerTest(
 
         with(error) {
             assertEquals(Status.UNAVAILABLE.code, status.code)
-            assertEquals("Serviço indisponível", status.description)
+            assertEquals("Serviço temporariamente indisponível", status.description)
             assertTrue(repository.count() > 0)
         }
     }

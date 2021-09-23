@@ -1,5 +1,6 @@
 package br.com.zup.edu.chaves
 
+import java.time.LocalDateTime
 import javax.persistence.*
 import javax.persistence.EnumType.*
 import javax.persistence.GenerationType.*
@@ -18,13 +19,22 @@ class ChaveEntity(
     @field:NotBlank @Size(max = 77)
     var valor: String,
 
-    @field:NotNull @Enumerated(value = STRING)
-    val tipoConta: TipoContaEntity,
+    @field:NotNull
+    @Embedded
+    val conta: Conta,
 
     @field:NotNull
-    val banco: String
+    val criadaEm: LocalDateTime
 ) {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     var id: Long? = null
+
+    fun instituicao(): Instituicao {
+        return conta.instituicao
+    }
+
+    fun titular(): Titular {
+        return conta.titular
+    }
 }

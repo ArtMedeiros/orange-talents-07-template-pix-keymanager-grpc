@@ -12,6 +12,9 @@ import javax.validation.Valid
 @Produces(value = [MediaType.APPLICATION_XML])
 interface BcbClient {
 
+    @Get("\${bcb.pix.services}/{key}")
+    fun buscarChaveByValor(@PathVariable key: String) : PixKeyDetailsResponse?
+
     @Post("\${bcb.pix.services}")
     fun cadastrarChave(@Valid @Body request: CreatePixKeyRequest) : CreatePixKeyResponse?
 
