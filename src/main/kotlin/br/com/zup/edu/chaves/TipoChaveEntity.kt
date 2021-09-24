@@ -1,55 +1,20 @@
 package br.com.zup.edu.chaves
 
 import br.com.zup.edu.utils.services.bcb.TipoChaveBCB
-import io.micronaut.validation.validator.constraints.EmailValidator
 
 enum class TipoChaveEntity {
     CPF {
-        override fun converterBcb(): TipoChaveBCB {
-            return TipoChaveBCB.CPF
-        }
-
-        override fun valida(valor: String): Boolean {
-            return if (valor.isNullOrBlank())
-                false
-            else
-                valor.matches("^[0-9]{11}\$".toRegex())
-        }
+        override fun converterBcb(): TipoChaveBCB = TipoChaveBCB.CPF
     },
     TELEFONE {
-        override fun converterBcb(): TipoChaveBCB {
-            return TipoChaveBCB.PHONE
-        }
-
-        override fun valida(valor: String): Boolean {
-            return if (valor.isNullOrBlank())
-                false
-            else
-                valor.matches("^\\+[1-9][0-9]\\d{1,14}\$".toRegex())
-        }
+        override fun converterBcb(): TipoChaveBCB = TipoChaveBCB.PHONE
     },
     EMAIL {
-        override fun converterBcb(): TipoChaveBCB {
-            return TipoChaveBCB.EMAIL
-        }
-
-        override fun valida(valor: String): Boolean {
-            return if (valor.isNullOrBlank())
-                false
-            else
-                valor.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+\$".toRegex())
-        }
+        override fun converterBcb(): TipoChaveBCB = TipoChaveBCB.EMAIL
     },
     RANDOM {
-        override fun converterBcb(): TipoChaveBCB {
-            return TipoChaveBCB.RANDOM
-        }
-
-        override fun valida(valor: String): Boolean {
-            return valor.isNullOrBlank()
-        }
+        override fun converterBcb(): TipoChaveBCB = TipoChaveBCB.RANDOM
     };
 
     abstract fun converterBcb(): TipoChaveBCB
-    abstract fun valida(valor: String): Boolean
 }

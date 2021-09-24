@@ -1,8 +1,10 @@
 package br.com.zup.edu.utils.services
 
+import br.com.zup.edu.ConsultaResponse
 import br.com.zup.edu.chaves.*
 import br.com.zup.edu.chaves.dto.RegistrarChaveRequest
 import br.com.zup.edu.chaves.dto.ConsultarChaveRequest
+import br.com.zup.edu.chaves.dto.DetalhesDadosChave
 import br.com.zup.edu.chaves.dto.RemoverChaveRequest
 import br.com.zup.edu.utils.error.ChaveDuplicadaException
 import br.com.zup.edu.utils.error.ChaveNaoEncontradaException
@@ -26,17 +28,20 @@ open class ChavePixService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     open fun registra(@Valid novaChave: RegistrarChaveRequest): ChaveEntity {
+        logger.info("Verificando chave")
+
         if (repository.existsByValor(novaChave.chave)) {
             throw ChaveDuplicadaException("Chave já cadastrada")
         }
 
-        val cliente = erpCliet.buscarCliente(novaChave.cliente, novaChave.tipoConta!!)
+        logger.info("Validando dados")
+        val cliente = erpCliet.buscarCliente(novaChave.cliente, novaChave.tipoConta)
             ?: throw ClienteNaoEncontradoException("Cliente não encontrado")
 
         novaChave.dadosConta(cliente)
 
         val bcbRequest = CreatePixKeyRequest(
-            keyType = novaChave.tipo!!.converterBcb(),
+            keyType = novaChave.tipo.converterBcb(),
             key = novaChave.valor,
             bankAccount = BankAccountRequest(
                 participant = cliente.instituicao.ispb,
@@ -89,17 +94,23 @@ open class ChavePixService(
         return chave
     }
 
-    open fun consulta(consultaChave: ConsultarChaveRequest): ChaveEntity {
+    open fun consulta(consultaChave: ConsultarChaveRequest): ConsultaResponse {
         return if (consultaChave.chave.isBlank()) {
-            val chaveBanco = repository.findByIdAndIdCliente(consultaChave.pixId!!, consultaChave.clienteId!!)
+            val chaveBanco = repository.findByIdAndIdCliente(consultaChave.pixId, consultaChave.clienteId)
             if (chaveBanco.isEmpty)
                 throw ChaveNaoEncontradaException("Chave não encontrada")
 
-            chaveBanco.get()
+            DetalhesDadosChave.toConsultaResponse(chaveBanco.get())
         } else {
-            bcbClient.buscarChaveByValor(consultaChave.chave)
-                ?: throw ChaveNaoEncontradaException("Chave não encontrada")
-            repository.findByValor(consultaChave.chave)
+            val chaveBanco = repository.findByValor(consultaChave.chave)
+            if (chaveBanco.isPresent) {
+                DetalhesDadosChave.toConsultaResponse(chaveBanco.get())
+            } else {
+                val pixDetails = bcbClient.buscarChaveByValor(consultaChave.chave)
+                    ?: throw ChaveNaoEncontradaException("Chave não encontrada")
+
+                DetalhesDadosChave.toConsultaResponse(pixDetails)
+            }
         }
     }
 }

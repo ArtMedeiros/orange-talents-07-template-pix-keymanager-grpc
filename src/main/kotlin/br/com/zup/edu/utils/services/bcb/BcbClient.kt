@@ -16,8 +16,8 @@ interface BcbClient {
     fun buscarChaveByValor(@PathVariable key: String) : PixKeyDetailsResponse?
 
     @Post("\${bcb.pix.services}")
-    fun cadastrarChave(@Valid @Body request: CreatePixKeyRequest) : CreatePixKeyResponse?
+    fun cadastrarChave(@Body @Valid request: CreatePixKeyRequest) : CreatePixKeyResponse?
 
     @Delete("\${bcb.pix.services}/{key}")
-    fun removerChave(@PathVariable key: String, @Valid @Body request: DeletePixKeyRequest) : HttpResponse<Any?>
+    fun removerChave(@PathVariable key: String, @Body @Valid request: DeletePixKeyRequest) : HttpResponse<Any?>
 }

@@ -6,13 +6,8 @@ import javax.validation.constraints.NotBlank
 
 @Introspected
 data class TitularConta(
-    @field:NotBlank
     val id: String,
-
-    @field:NotBlank
     val nome: String,
-
-    @field:NotBlank
     val cpf: String,
 ) {
     fun toModel(): Titular {

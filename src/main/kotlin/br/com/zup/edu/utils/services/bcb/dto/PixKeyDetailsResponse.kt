@@ -1,6 +1,9 @@
 package br.com.zup.edu.utils.services.bcb.dto
 
+import br.com.zup.edu.chaves.TipoChaveEntity
+import br.com.zup.edu.chaves.dto.RegistrarChaveRequest
 import br.com.zup.edu.utils.services.bcb.TipoChaveBCB
+import br.com.zup.edu.utils.services.itau.dto.ContaItauResponse
 import io.micronaut.core.annotation.Introspected
 import java.time.LocalDateTime
 import javax.validation.constraints.NotBlank

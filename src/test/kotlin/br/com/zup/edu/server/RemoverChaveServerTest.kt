@@ -6,6 +6,7 @@ import br.com.zup.edu.chaves.ChaveEntity
 import br.com.zup.edu.chaves.ChavePixRepository
 import br.com.zup.edu.chaves.TipoChaveEntity
 import br.com.zup.edu.chaves.TipoContaEntity
+import br.com.zup.edu.utils.error.ChaveNaoEncontradaException
 import br.com.zup.edu.utils.services.bcb.BcbClient
 import br.com.zup.edu.utils.services.bcb.dto.DeletePixKeyRequest
 import br.com.zup.edu.utils.services.itau.dto.ContaItauResponse
@@ -19,6 +20,7 @@ import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.exceptions.HttpClientException
+import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import jakarta.inject.Singleton
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
+import java.time.LocalDateTime
 
 @MicronautTest(transactional = false)
 internal class RemoverChaveServerTest(
@@ -58,7 +61,8 @@ internal class RemoverChaveServerTest(
         idCliente = "de95a228-1f27-4ad2-907e-e5a2d816e9bc",
         tipo = TipoChaveEntity.CPF,
         valor = "31643468081",
-        conta = contaItauResponse.toModel()
+        conta = contaItauResponse.toModel(),
+        criadaEm = LocalDateTime.now()
     )
 
     val deleteKey = DeletePixKeyRequest(
@@ -131,6 +135,29 @@ internal class RemoverChaveServerTest(
     }
 
     @Test
+    internal fun `nao deve remover uma chave inexistente`() {
+        val obj = repository.save(chave)
+
+        val request = RemoverRequest
+            .newBuilder()
+            .setCliente("5260263c-a3c1-4727-ae32-3bdb2538841b")
+            .setPixId(obj.id!!)
+            .build()
+
+        Mockito.`when`(bcbClient.removerChave(chave.valor, deleteKey)).thenReturn(HttpResponse.notFound())
+
+        val error = assertThrows<StatusRuntimeException> {
+            grpcClient.removerChave(request)
+        }
+
+        with(error) {
+            assertEquals(Status.NOT_FOUND.code, status.code)
+            assertEquals("Chave não encontrada", status.description)
+            assertTrue(repository.count() > 0)
+        }
+    }
+
+    @Test
     internal fun `nao deve remover uma chave se bcb offline`() {
         val obj = repository.save(chave)
 
@@ -149,6 +176,29 @@ internal class RemoverChaveServerTest(
         with(error) {
             assertEquals(Status.UNAVAILABLE.code, status.code)
             assertEquals("Serviço temporariamente indisponível", status.description)
+            assertTrue(repository.count() > 0)
+        }
+    }
+
+    @Test
+    internal fun `nao remover chave que nao existe no bcb`() {
+        val obj = repository.save(chave)
+
+        val request = RemoverRequest
+            .newBuilder()
+            .setCliente(chave.idCliente)
+            .setPixId(obj.id!!)
+            .build()
+
+        Mockito.`when`(bcbClient.removerChave(chave.valor, deleteKey)).thenReturn(HttpResponse.notFound())
+
+        val error = assertThrows<StatusRuntimeException> {
+            grpcClient.removerChave(request)
+        }
+
+        with(error) {
+            assertEquals(Status.NOT_FOUND.code, status.code)
+            assertEquals("Chave não encontrada", status.description)
             assertTrue(repository.count() > 0)
         }
     }

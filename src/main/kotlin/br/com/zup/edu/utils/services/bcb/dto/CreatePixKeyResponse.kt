@@ -8,18 +8,13 @@ import javax.validation.constraints.NotNull
 
 @Introspected
 data class CreatePixKeyResponse(
-    @field:NotNull
     val keyType: TipoChaveBCB,
 
-    @field:NotBlank
     val key: String,
 
-    @field:NotNull
     val bankAccount: BankAccountRequest,
 
-    @field:NotNull
     val owner: OwnerRequest,
 
-    @field:NotNull
     val createdAt: LocalDateTime
 )

@@ -25,8 +25,4 @@ class Conta(
     @field:NotBlank
     @Embedded
     val titular: Titular
-) {
-    fun nomeTitular(): String {
-        return titular.nomeCliente
-    }
-}
+)

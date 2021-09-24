@@ -5,7 +5,6 @@ import br.com.zup.edu.ConsultaResponse
 import br.com.zup.edu.ConsultarChaveServiceGrpc
 import br.com.zup.edu.utils.error.config.ErrorHandler
 import br.com.zup.edu.utils.services.ChavePixService
-import br.com.zup.edu.utils.services.convertToConsultaChaveResponse
 import br.com.zup.edu.utils.services.toModel
 import io.grpc.stub.StreamObserver
 import jakarta.inject.Singleton
@@ -25,10 +24,8 @@ class ConsultarChaveServer(
         val consultaRequest = request.toModel()
         val dados = service.consulta(consultaRequest)
 
-        val response: ConsultaResponse = convertToConsultaChaveResponse(dados, consultaRequest)
-
-        logger.info("Retornando dados da chave ${dados.valor}")
-        responseObserver.onNext(response)
+        logger.info("Retornando dados da chave ${dados.chave.chave}")
+        responseObserver.onNext(dados)
         responseObserver.onCompleted()
     }
 }

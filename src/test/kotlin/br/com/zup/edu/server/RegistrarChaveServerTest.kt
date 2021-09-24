@@ -7,6 +7,7 @@ import br.com.zup.edu.TipoConta
 import br.com.zup.edu.chaves.*
 import br.com.zup.edu.utils.services.bcb.BcbClient
 import br.com.zup.edu.utils.services.bcb.TipoChaveBCB
+import br.com.zup.edu.utils.services.bcb.TipoContaBCB
 import br.com.zup.edu.utils.services.bcb.TipoUsuarioBCB
 import br.com.zup.edu.utils.services.bcb.dto.BankAccountRequest
 import br.com.zup.edu.utils.services.bcb.dto.CreatePixKeyRequest
@@ -32,13 +33,14 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.ArgumentMatcher
 import org.mockito.Mockito
+import org.mockito.internal.matchers.InstanceOf
+import org.mockito.internal.progress.ThreadSafeMockingProgress
 import java.time.LocalDateTime
 
 @MicronautTest(
-    rollback = false,
-    transactional = false,
-    transactionMode = TransactionMode.SEPARATE_TRANSACTIONS
+    transactional = false
 )
 internal class RegistrarChaveServerTest(
     val clienteERP: ErpItauClient,
@@ -47,7 +49,9 @@ internal class RegistrarChaveServerTest(
     val grpcClient: RegistrarChaveServiceGrpc.RegistrarChaveServiceBlockingStub
 ) {
     lateinit var contaItauResponse: ContaItauResponse
+    lateinit var contaItauResponsePoupanca: ContaItauResponse
     lateinit var bcbRequest: CreatePixKeyRequest
+    lateinit var bcbRequestPoupanca: CreatePixKeyRequest
     lateinit var bcbResponse: CreatePixKeyResponse
 
     @BeforeEach
@@ -71,6 +75,14 @@ internal class RegistrarChaveServerTest(
             titular = titularConta
         )
 
+        contaItauResponsePoupanca = ContaItauResponse(
+            tipo = TipoContaEntity.CONTA_POUPANCA,
+            instituicao = instituicaoResponse,
+            agencia = "0001",
+            numero = "291900",
+            titular = titularConta
+        )
+
         bcbRequest = CreatePixKeyRequest(
             keyType = TipoChaveBCB.CPF,
             key = "00000000000",
@@ -79,6 +91,22 @@ internal class RegistrarChaveServerTest(
                 branch = contaItauResponse.agencia,
                 accountNumber = contaItauResponse.numero,
                 accountType = contaItauResponse.tipo.converterBcb()
+            ),
+            owner = OwnerRequest(
+                type = TipoUsuarioBCB.NATURAL_PERSON,
+                name = titularConta.nome,
+                taxIdNumber = titularConta.cpf
+            )
+        )
+
+        bcbRequestPoupanca = CreatePixKeyRequest(
+            keyType = TipoChaveBCB.EMAIL,
+            key = "testmail@mail.com",
+            bankAccount = BankAccountRequest(
+                participant = instituicaoResponse.ispb,
+                branch = contaItauResponse.agencia,
+                accountNumber = contaItauResponse.numero,
+                accountType = contaItauResponsePoupanca.tipo.converterBcb()
             ),
             owner = OwnerRequest(
                 type = TipoUsuarioBCB.NATURAL_PERSON,
@@ -111,20 +139,20 @@ internal class RegistrarChaveServerTest(
     internal fun `deve cadastrar uma nova chave pix`() {
         val request = ChaveRequest.newBuilder()
             .setCliente("c56dfef4-7901-44fb-84e2-a2cefb157890")
-            .setTipoChave(TipoChave.CPF)
-            .setChave("00000000000")
-            .setConta(TipoConta.CONTA_CORRENTE)
+            .setTipoChave(TipoChave.EMAIL)
+            .setChave("testmail@mail.com")
+            .setConta(TipoConta.CONTA_POUPANCA)
             .build()
 
         Mockito.`when`(
             clienteERP.buscarCliente(
                 clienteId = "c56dfef4-7901-44fb-84e2-a2cefb157890",
-                tipo = TipoContaEntity.CONTA_CORRENTE
+                tipo = TipoContaEntity.CONTA_POUPANCA
             )
-        ).thenReturn(contaItauResponse)
+        ).thenReturn(contaItauResponsePoupanca)
 
         Mockito.`when`(
-            bcbClient.cadastrarChave(bcbRequest)
+            bcbClient.cadastrarChave(bcbRequestPoupanca)
         ).thenReturn(bcbResponse)
 
         val response = grpcClient.gerarChave(request)
@@ -165,8 +193,7 @@ internal class RegistrarChaveServerTest(
     internal fun `nao deve cadastrar com chave invalida`() {
         val request = ChaveRequest.newBuilder()
             .setCliente("c56dfef4-7901-44fb-84e2-a2cefb157890")
-            .setTipoChave(TipoChave.CPF)
-            .setChave("ABC")
+            .setTipoChave(TipoChave.TELEFONE)
             .setConta(TipoConta.CONTA_CORRENTE)
             .build()
 
@@ -184,16 +211,17 @@ internal class RegistrarChaveServerTest(
     internal fun `nao deve cadastrar chave duplicada`() {
         val request = ChaveRequest.newBuilder()
             .setCliente("c56dfef4-7901-44fb-84e2-a2cefb157890")
-            .setTipoChave(TipoChave.CPF)
-            .setChave("00000000000")
+            .setTipoChave(TipoChave.TELEFONE)
+            .setChave("+559999999999")
             .setConta(TipoConta.CONTA_CORRENTE)
             .build()
 
         val chave = ChaveEntity(
             idCliente = "c56dfef4-7901-44fb-84e2-a2cefb157890",
-            tipo = TipoChaveEntity.CPF,
-            valor = "00000000000",
-            conta = contaItauResponse.toModel()
+            tipo = TipoChaveEntity.TELEFONE,
+            valor = "+559999999999",
+            conta = contaItauResponse.toModel(),
+            criadaEm = LocalDateTime.now()
         )
 
         repository.save(chave)
@@ -256,7 +284,7 @@ internal class RegistrarChaveServerTest(
 
         with(error) {
             assertEquals(Status.NOT_FOUND.code, status.code)
-            assertEquals("Chave ou Cliente não encontrado", status.description)
+            assertEquals("Recurso não encontrado", status.description)
         }
     }
 
@@ -287,6 +315,66 @@ internal class RegistrarChaveServerTest(
         with(error) {
             assertEquals(Status.UNAVAILABLE.code, status.code)
             assertEquals("Serviço temporariamente indisponível", status.description)
+        }
+    }
+
+    @Test
+    internal fun `deve cadastrar chave aleatoria`() {
+        val request = ChaveRequest.newBuilder()
+            .setCliente("c56dfef4-7901-44fb-84e2-a2cefb157890")
+            .setTipoChave(TipoChave.RANDOM)
+            .setConta(TipoConta.CONTA_CORRENTE)
+            .build()
+
+        Mockito.`when`(
+            clienteERP.buscarCliente(
+                clienteId = "c56dfef4-7901-44fb-84e2-a2cefb157890",
+                tipo = TipoContaEntity.CONTA_CORRENTE
+            )
+        ).thenReturn(contaItauResponse)
+
+        val bcbReq = CreatePixKeyRequest(
+            keyType = TipoChaveBCB.RANDOM,
+            key = TipoChaveEntity.RANDOM.name,
+            bankAccount = BankAccountRequest(
+                participant = contaItauResponse.instituicao.ispb,
+                branch = contaItauResponse.agencia,
+                accountNumber = contaItauResponse.numero,
+                accountType = contaItauResponse.tipo.converterBcb()
+            ),
+            owner = OwnerRequest(
+                type = TipoUsuarioBCB.NATURAL_PERSON,
+                name = contaItauResponse.titular.nome,
+                taxIdNumber = contaItauResponse.titular.cpf
+            )
+        )
+
+        val bcbResp = CreatePixKeyResponse(
+            keyType = TipoChaveBCB.RANDOM,
+            key = "aa52cd23-f52b-4c01-b60b-9950f3ac3711",
+            bankAccount = BankAccountRequest(
+                participant = contaItauResponse.instituicao.ispb,
+                branch = contaItauResponse.agencia,
+                accountNumber = contaItauResponse.numero,
+                accountType = contaItauResponse.tipo.converterBcb()
+            ),
+            owner = OwnerRequest(
+                type = TipoUsuarioBCB.NATURAL_PERSON,
+                name = contaItauResponse.titular.nome,
+                taxIdNumber = contaItauResponse.titular.cpf
+            ),
+            createdAt = LocalDateTime.now()
+        )
+
+        Mockito.`when`(
+            bcbClient.cadastrarChave(bcbReq)
+        ).thenReturn(bcbResp)
+
+        val response = grpcClient.gerarChave(request)
+
+        with(response) {
+            assertNotNull(pixId)
+            assertTrue(repository.existsById(pixId))
         }
     }
 

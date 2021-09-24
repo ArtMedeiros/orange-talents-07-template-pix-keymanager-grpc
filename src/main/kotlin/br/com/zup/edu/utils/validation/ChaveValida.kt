@@ -1,5 +1,7 @@
 package br.com.zup.edu.utils
 
+import br.com.zup.edu.chaves.TipoChaveEntity
+import br.com.zup.edu.chaves.TipoChaveEntity.*
 import br.com.zup.edu.chaves.dto.RegistrarChaveRequest
 import io.micronaut.core.annotation.AnnotationValue
 import io.micronaut.validation.validator.constraints.ConstraintValidator
@@ -20,6 +22,18 @@ class ChaveValidator : ConstraintValidator<ChaveValida, RegistrarChaveRequest> {
         annotationMetadata: AnnotationValue<ChaveValida>,
         context: ConstraintValidatorContext
     ): Boolean {
-        return value.tipo?.valida(value.chave) ?: false
+        return validaEnum(value.chave, value.tipo)
+    }
+
+    private fun validaEnum(chave: String, tipo: TipoChaveEntity): Boolean {
+        if (chave.isBlank() && tipo != RANDOM)
+            return false
+
+        return when(tipo) {
+            CPF -> chave.matches("^[0-9]{11}\$".toRegex())
+            TELEFONE -> chave.matches("^\\+[1-9][0-9]\\d{1,14}\$".toRegex())
+            EMAIL -> chave.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+\$".toRegex())
+            else -> chave.isBlank()
+        }
     }
 }

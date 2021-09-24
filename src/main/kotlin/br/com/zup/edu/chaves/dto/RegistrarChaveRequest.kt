@@ -17,10 +17,10 @@ data class RegistrarChaveRequest(
     @field:NotBlank
     val cliente: String,
     @field:NotNull
-    val tipo: TipoChaveEntity?,
+    val tipo: TipoChaveEntity,
     val chave: String,
     @field:NotNull
-    val tipoConta: TipoContaEntity?
+    val tipoConta: TipoContaEntity
 ) {
 
     var valor: String
@@ -32,7 +32,7 @@ data class RegistrarChaveRequest(
 
     init{
         valor = when(tipo) {
-            TipoChaveEntity.RANDOM -> UUID.randomUUID().toString()
+            TipoChaveEntity.RANDOM -> TipoChaveEntity.RANDOM.name
             else -> chave
         }
     }
@@ -40,7 +40,7 @@ data class RegistrarChaveRequest(
     fun toChaveEntity(): ChaveEntity {
         return ChaveEntity(
             idCliente = cliente,
-            tipo = tipo!!,
+            tipo = tipo,
             valor = valor,
             conta = conta,
             criadaEm = criadaEm

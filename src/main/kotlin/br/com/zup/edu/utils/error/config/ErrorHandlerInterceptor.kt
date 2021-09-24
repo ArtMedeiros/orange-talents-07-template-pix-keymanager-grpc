@@ -59,11 +59,11 @@ class ErrorHandlerInterceptor : MethodInterceptor<Any, Any> {
                 }
 
                 is HttpClientResponseException -> {
-                    logger.error("Chave ou Cliente não encontrado")
+                    logger.error("Recurso não encontrado")
 
                     Status.NOT_FOUND
                         .withCause(ex)
-                        .withDescription("Chave ou Cliente não encontrado")
+                        .withDescription("Recurso não encontrado")
                 }
 
                 is HttpClientException -> {
