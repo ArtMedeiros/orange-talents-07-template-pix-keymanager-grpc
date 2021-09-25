@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "br.com.zup.edu";
+option java_outer_classname = "ListarChavePix";
+option objc_class_prefix = "HLW";
+
+import "google/protobuf/timestamp.proto";
+
+package br.com.zup.edu;
+
+service ListarChaveService {
+  rpc listarChave (ListaRequest) returns (ListaResponse) {}
+}
+
+message ListaRequest {
+  string clienteId = 1;
+}
+
+message ListaResponse {
+  message Chave {
+    int64 pixId = 1;
+    string clienteId = 2;
+    string tipoChave = 3;
+    string chave = 4;
+    string tipoConta = 5;
+    google.protobuf.Timestamp criadaEm = 6;
+  }
+
+  repeated Chave chaves = 1;
+}

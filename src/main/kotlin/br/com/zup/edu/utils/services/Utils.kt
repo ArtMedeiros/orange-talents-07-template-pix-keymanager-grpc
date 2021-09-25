@@ -1,18 +1,12 @@
 package br.com.zup.edu.utils.services
 
-import br.com.zup.edu.ChaveRequest
-import br.com.zup.edu.ConsultaRequest
-import br.com.zup.edu.ConsultaRequest.FiltroCase.*
-import br.com.zup.edu.ConsultaResponse
-import br.com.zup.edu.RemoverRequest
+import br.com.zup.edu.*
+import br.com.zup.edu.ConsultaRequest.FiltroCase.FILTRO_NOT_SET
 import br.com.zup.edu.TipoChave.INVALID
 import br.com.zup.edu.TipoConta.UNKNOW
-import br.com.zup.edu.chaves.*
-import br.com.zup.edu.chaves.dto.RegistrarChaveRequest
-import br.com.zup.edu.chaves.dto.ConsultarChaveRequest
-import br.com.zup.edu.chaves.dto.DetalhesDadosChave
-import br.com.zup.edu.chaves.dto.RemoverChaveRequest
-import br.com.zup.edu.utils.services.bcb.dto.PixKeyDetailsResponse
+import br.com.zup.edu.chaves.TipoChaveEntity
+import br.com.zup.edu.chaves.TipoContaEntity
+import br.com.zup.edu.chaves.dto.*
 import com.google.protobuf.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -53,6 +47,23 @@ fun ConsultaRequest.toModel(): ConsultarChaveRequest {
 
 fun toConsultaResponse(dados: DetalhesDadosChave) : ConsultaResponse {
     return convertToConsultaChaveResponse(dados)
+}
+
+fun toListaResponse(dados: List<ListaDeChavesResponse>): ListaResponse {
+    val chavesResponse = dados.map { chave ->
+        ListaResponse.Chave.newBuilder()
+            .setPixId(chave.pixId)
+            .setClienteId(chave.clienteId)
+            .setTipoChave(chave.tipoChave)
+            .setChave(chave.valor)
+            .setTipoConta(chave.tipoConta)
+            .setCriadaEm(convertToTimestamp(chave.criadaEm))
+            .build()
+    }
+
+    return ListaResponse.newBuilder()
+        .addAllChaves(chavesResponse)
+        .build()
 }
 
 private fun convertToConsultaChaveResponse(dados: DetalhesDadosChave): ConsultaResponse {

@@ -5,9 +5,6 @@ import javax.validation.constraints.NotBlank
 
 @Introspected
 data class DeletePixKeyRequest(
-    @field:NotBlank
     val key: String,
-
-    @field:NotBlank
     val participant: String
 )

@@ -1,6 +1,6 @@
 package br.com.zup.edu.chaves
 
-import io.micronaut.http.client.exceptions.HttpClientResponseException
+import br.com.zup.edu.utils.error.InstituicaoNaoEncontradaException
 import javax.persistence.Embeddable
 import javax.validation.constraints.NotBlank
 
@@ -15,7 +15,8 @@ class Instituicao(
 
     companion object Factory {
         fun nomeByIspb(ispb: String) : String {
-            val instituicao = listaInstituicoes().find { it.ispb == ispb } ?: throw throw HttpClientResponseException("Instituição não encontrada", null)
+            val instituicao = listaInstituicoes().find { it.ispb == ispb }
+                ?: throw throw InstituicaoNaoEncontradaException("Instituição não encontrada")
 
             return instituicao.nomeInstituicao
         }

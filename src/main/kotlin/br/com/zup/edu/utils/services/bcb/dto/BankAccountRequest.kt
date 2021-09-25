@@ -19,7 +19,6 @@ data class BankAccountRequest(
     @field:NotBlank
     val accountNumber: String,
 
-    @field:NotNull
     val accountType: TipoContaBCB
 ) {
 

@@ -12,4 +12,6 @@ interface ChavePixRepository : JpaRepository<ChaveEntity, Long>{
     fun findByIdAndIdCliente(id: Long, idCliente: String) : Optional<ChaveEntity>
 
     fun findByValor(valor: String) : Optional<ChaveEntity>
+
+    fun findAllByIdCliente(idCliente: String): List<ChaveEntity>
 }

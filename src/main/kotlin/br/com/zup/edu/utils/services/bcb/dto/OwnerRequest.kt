@@ -7,12 +7,7 @@ import javax.validation.constraints.NotNull
 
 @Introspected
 data class OwnerRequest(
-    @field:NotNull
     val type: TipoUsuarioBCB,
-
-    @field:NotBlank
     val name: String,
-
-    @field:NotBlank
     val taxIdNumber: String
 )

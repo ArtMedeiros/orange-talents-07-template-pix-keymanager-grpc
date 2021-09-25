@@ -1,11 +1,9 @@
 package br.com.zup.edu.utils.services
 
 import br.com.zup.edu.ConsultaResponse
+import br.com.zup.edu.ListaResponse
 import br.com.zup.edu.chaves.*
-import br.com.zup.edu.chaves.dto.RegistrarChaveRequest
-import br.com.zup.edu.chaves.dto.ConsultarChaveRequest
-import br.com.zup.edu.chaves.dto.DetalhesDadosChave
-import br.com.zup.edu.chaves.dto.RemoverChaveRequest
+import br.com.zup.edu.chaves.dto.*
 import br.com.zup.edu.utils.error.ChaveDuplicadaException
 import br.com.zup.edu.utils.error.ChaveNaoEncontradaException
 import br.com.zup.edu.utils.error.ClienteNaoEncontradoException
@@ -16,6 +14,7 @@ import br.com.zup.edu.utils.services.itau.ErpItauClient
 import io.micronaut.http.HttpStatus
 import jakarta.inject.Singleton
 import org.slf4j.LoggerFactory
+import javax.validation.ConstraintViolationException
 import javax.validation.Valid
 
 @Singleton
@@ -112,5 +111,16 @@ open class ChavePixService(
                 DetalhesDadosChave.toConsultaResponse(pixDetails)
             }
         }
+    }
+
+    fun listar(clienteId: String): ListaResponse {
+        if(clienteId.isBlank())
+            throw ConstraintViolationException("Id do cliente não informado", setOf())
+
+        val lista = repository.findAllByIdCliente(clienteId)
+        if (lista.isEmpty())
+            throw ChaveNaoEncontradaException("Nenhuma chave encontrada")
+
+        return ListaDeChavesResponse.criarLista(lista)
     }
 }

@@ -3,6 +3,7 @@ package br.com.zup.edu.utils.error.config
 import br.com.zup.edu.utils.error.ChaveDuplicadaException
 import br.com.zup.edu.utils.error.ChaveNaoEncontradaException
 import br.com.zup.edu.utils.error.ClienteNaoEncontradoException
+import br.com.zup.edu.utils.error.InstituicaoNaoEncontradaException
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import io.micronaut.aop.InterceptorBean
@@ -62,15 +63,20 @@ class ErrorHandlerInterceptor : MethodInterceptor<Any, Any> {
                     logger.error("Recurso não encontrado")
 
                     Status.NOT_FOUND
-                        .withCause(ex)
                         .withDescription("Recurso não encontrado")
+                }
+
+                is InstituicaoNaoEncontradaException -> {
+                    logger.error(ex.message)
+
+                    Status.NOT_FOUND
+                        .withDescription(ex.message)
                 }
 
                 is HttpClientException -> {
                     logger.error("Serviço temporariamente indisponível")
 
                     Status.UNAVAILABLE
-                        .withCause(ex)
                         .withDescription("Serviço temporariamente indisponível")
                 }
 

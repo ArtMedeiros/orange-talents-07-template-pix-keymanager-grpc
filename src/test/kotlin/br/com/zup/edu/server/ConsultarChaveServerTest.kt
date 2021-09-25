@@ -56,8 +56,8 @@ internal class ConsultarChaveServerTest(
 
         chaveEntity = ChaveEntity(
             idCliente = "5260263c-a3c1-4727-ae32-3bdb2538841b",
-            tipo = TipoChaveEntity.CPF,
-            valor = "00000000000",
+            tipo = TipoChaveEntity.TELEFONE,
+            valor = "+5599999999999",
             conta = conta,
             criadaEm = LocalDateTime.now()
         )
@@ -105,7 +105,7 @@ internal class ConsultarChaveServerTest(
         val obj = repository.save(chaveEntity)
 
         val request = ConsultaRequest.newBuilder()
-            .setChave("00000000000")
+            .setChave("+5599999999999")
             .build()
 
         Mockito.`when`(
@@ -207,6 +207,44 @@ internal class ConsultarChaveServerTest(
         with(error) {
             assertEquals(Status.UNKNOWN.code, status.code)
             assertTrue(status.description!!.contains("Não foi possível processar a requisição"))
+        }
+    }
+
+    @Test
+    internal fun `nao deve consultar chaves de instituicao nao registrada`() {
+        val request = ConsultaRequest.newBuilder()
+            .setChave("00000000000")
+            .build()
+
+        val bancoInvalido = PixKeyDetailsResponse(
+            keyType = TipoChaveBCB.PHONE,
+            key = "12345678901234",
+            bankAccount = BankAccountRequest(
+                participant = "1234",
+                branch = "1234",
+                accountNumber = "1234",
+                accountType = TipoContaBCB.CACC
+            ),
+            owner = OwnerRequest(
+                type = TipoUsuarioBCB.NATURAL_PERSON,
+                name = "Teste",
+                taxIdNumber = "1234"
+            ),
+            createdAt = LocalDateTime.now()
+        )
+
+        Mockito.`when`(
+            bcbClient.buscarChaveByValor(request.chave)
+        ).thenReturn(bancoInvalido)
+
+
+        val error = assertThrows<StatusRuntimeException> {
+            grpcClient.consultarChave(request)
+        }
+
+        with(error) {
+            assertEquals(Status.NOT_FOUND.code, status.code)
+            assertEquals("Instituição não encontrada", status.description)
         }
     }
 
